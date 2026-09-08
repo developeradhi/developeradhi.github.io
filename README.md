@@ -13,7 +13,7 @@
 
 ---
 
-![Portfolio Preview](preview.png)
+![Portfolio Preview](assets/preview.png)
 
 </div>
 
