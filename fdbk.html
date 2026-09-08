@@ -1,8 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Zero-Latency Maintenance Overlay (No URL Redirects, No Flashing) -->
+    <style id="maintenance-anti-flicker">
+      body > *:not(#nexus-maintenance-overlay) { opacity: 0 !important; pointer-events: none; }
+    </style>
+    <script>
+      const mStyle = document.createElement('style');
+      mStyle.innerHTML = `
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap');
+
+        #nexus-maintenance-overlay {
+          position: fixed; inset: 0; z-index: 9999999;
+          display: none; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden;
+        }
+        #nexus-maintenance-overlay.active { display: block !important; pointer-events: all !important; }
+
+        /* ── LAYOUT ── */
+        .m-layout { display: flex; width: 100vw; height: 100vh; }
+
+        /* ── LEFT: Full-bleed city photo ── */
+        .m-photo {
+          flex: 0 0 52%;
+          position: relative;
+          background:
+            url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?q=90&w=2400')
+            center 40% / cover no-repeat;
+        }
+        .m-photo::after {
+          content: '';
+          position: absolute; inset: 0;
+          background: linear-gradient(135deg, rgba(10,14,30,0.35) 0%, rgba(5,8,20,0.70) 100%);
+        }
+        /* Floating status pill on photo */
+        .m-photo-badge {
+          position: absolute; bottom: 2.5rem; left: 2.5rem; z-index: 2;
+          display: flex; align-items: center; gap: 10px;
+          padding: 10px 18px; border-radius: 100px;
+          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.15);
+          backdrop-filter: blur(12px);
+          color: #fff; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em;
+        }
+        .m-pulse {
+          width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;
+          box-shadow: 0 0 0 0 rgba(245,158,11,0.6);
+          animation: ripple 1.6s ease-out infinite;
+        }
+        @keyframes ripple {
+          0%   { box-shadow: 0 0 0 0 rgba(245,158,11,0.6); }
+          70%  { box-shadow: 0 0 0 10px rgba(245,158,11,0); }
+          100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+        }
+
+        /* ── RIGHT: White minimal card ── */
+        .m-panel {
+          flex: 1;
+          background: #ffffff;
+          display: flex; flex-direction: column; justify-content: center;
+          padding: 5rem 8% 4rem;
+          position: relative;
+          box-shadow: -30px 0 60px rgba(0,0,0,0.12);
+          overflow-y: auto;
+        }
+
+        /* Wordmark top-LEFT — exactly like mockup */
+        .m-wordmark {
+          position: absolute; top: 2.5rem; left: 8%;
+          font-size: 1rem; font-weight: 800; color: #0f172a; letter-spacing: -0.01em;
+        }
+
+        /* Label */
+        .m-label {
+          display: inline-flex; align-items: center; gap: 8px;
+          padding: 7px 16px; border-radius: 100px;
+          background: #fef9c3; border: 1px solid #fde68a;
+          color: #92400e; font-size: 0.82rem; font-weight: 600;
+          margin-bottom: 2rem; align-self: flex-start;
+        }
+
+        .m-panel h1 {
+          font-size: clamp(2.8rem, 4.5vw, 4.2rem);
+          font-weight: 900; color: #0f172a; line-height: 1.0;
+          letter-spacing: -0.04em; margin-bottom: 1.5rem;
+        }
+
+        .m-panel p {
+          font-size: 1rem; color: #64748b;
+          line-height: 1.75; max-width: 420px; margin-bottom: 2.4rem;
+        }
+
+        /* Profile row — 3 lines exactly like mockup */
+        .m-profile { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 2.4rem; max-width: 440px; }
+        .m-avatar {
+          width: 52px; height: 52px; border-radius: 50%;
+          border: 2px solid #e2e8f0; flex-shrink: 0; object-fit: cover;
+        }
+        .m-profile-name { font-size: 1rem; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+        .m-profile-sub { font-size: 0.875rem; color: #475569; margin-bottom: 4px; }
+        .m-profile-role { font-size: 0.82rem; color: #64748b; display: flex; align-items: center; gap: 6px; }
+        .m-online-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block; flex-shrink: 0; }
+
+        /* CTA Button */
+        .m-btn {
+          display: inline-flex; align-items: center;
+          background: #0f172a; color: #fff;
+          padding: 14px 28px; border-radius: 8px;
+          font-weight: 700; font-size: 0.95rem;
+          text-decoration: none;
+          transition: transform 0.15s, background 0.15s;
+          align-self: flex-start;
+        }
+        .m-btn:hover { background: #1e293b; transform: translateY(-1px); }
+
+        /* Mobile */
+        @media (max-width: 860px) {
+          .m-layout { flex-direction: column; }
+          .m-photo { flex: 0 0 30vh; }
+          .m-panel { padding: 4rem 6% 2rem; justify-content: flex-start; }
+          .m-wordmark { top: 1.2rem; left: 6%; }
+          .m-label { margin-bottom: 1.2rem; }
+          .m-panel h1 { font-size: 2.2rem; margin-bottom: 1rem; }
+          .m-panel p { font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.6; }
+          .m-profile { margin-bottom: 1.5rem; gap: 12px; }
+          .m-avatar { width: 44px; height: 44px; }
+          .m-btn { width: 100%; justify-content: center; text-align: center; }
+          .m-photo-badge { bottom: 1rem; left: 1rem; padding: 8px 14px; font-size: 0.75rem; }
+        }
+      `;
+      document.head.appendChild(mStyle);
+
+      const checkStatus = () => {
+        fetch('https://mznzvxwzugimqzhhdnae.supabase.co/rest/v1/site_settings?select=is_maintenance_mode', {
+          headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16bnp2eHd6dWdpbXF6aGhkbmFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5ODkzNjksImV4cCI6MjEwMTU2NTM2OX0.AL0sY92IZeP_vSyqYRoKoKkE3oMPvNYukNU3uNbJhWs' }
+        }).then(r => r.json()).then(d => {
+          const isM = d[0]?.is_maintenance_mode;
+          let overlay = document.getElementById('nexus-maintenance-overlay');
+          if (isM) {
+            // MAINTENANCE ON: keep portfolio hidden, show overlay
+            if (!overlay) {
+              overlay = document.createElement('div');
+              overlay.id = 'nexus-maintenance-overlay';
+              overlay.innerHTML = `
+                <div class="m-layout">
+                  <div class="m-photo">
+                    <div class="m-photo-badge">
+                      <span class="m-pulse"></span>
+                      Maintenance in Progress
+                    </div>
+                  </div>
+                  <div class="m-panel">
+                    <div class="m-wordmark">adhi.is-a.dev</div>
+                    <div class="m-label">🔒 Maintenance in Progress</div>
+                    <h1>Under Renovation</h1>
+                    <p>We are currently enhancing our digital workspace to better serve you. Expect improvements and a refined experience very soon. We apologize for the brief interruption. Follow our progress.</p>
+                    <div class="m-profile">
+                      <img class="m-avatar" src="https://avatars.githubusercontent.com/u/154442004?v=4" alt="Adarsh B A">
+                      <div>
+                        <div class="m-profile-name">Adarsh B A</div>
+                        <div class="m-profile-sub">Full-Stack Engineer</div>
+                        <div class="m-profile-role">
+                          <span class="m-online-dot"></span>
+                          Available soon
+                        </div>
+                      </div>
+                    </div>
+                    <a href="mailto:contact@adhi.is-a.dev" class="m-btn">Contact Engineer</a>
+                  </div>
+                </div>
+              `;
+              document.body.appendChild(overlay);
+            }
+            overlay.classList.add('active');
+            // DO NOT remove anti-flicker — keep portfolio hidden underneath
+          } else {
+            // MAINTENANCE OFF: reveal site, hide overlay
+            const flicker = document.getElementById('maintenance-anti-flicker');
+            if (flicker) flicker.remove();
+            if (overlay) overlay.classList.remove('active');
+          }
+        }).catch(() => {
+          // DB error: default to showing the site (don't block visitors)
+          const flicker = document.getElementById('maintenance-anti-flicker');
+          if (flicker) flicker.remove();
+        });
+      };
+
+      checkStatus();
+      setInterval(checkStatus, 5000);
+      // Fallback ONLY if Supabase takes more than 3s — but only reveal site, never when maintenance is on
+      // (This is handled inside checkStatus itself; no unconditional timeout needed)
+    </script>
+
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.github.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://developeradhi.github.io https://avatars.githubusercontent.com https://ghchart.rshah.org; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://ipapi.co https://www.google-analytics.com https://region1.google-analytics.com https://api.github.com https://get.geojs.io https://*.peerjs.com wss://*.peerjs.com">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.github.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://developeradhi.github.io https://avatars.githubusercontent.com https://ghchart.rshah.org https://images.unsplash.com; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://ipapi.co https://www.google-analytics.com https://region1.google-analytics.com https://api.github.com https://get.geojs.io https://*.peerjs.com wss://*.peerjs.com https://*.supabase.co wss://*.supabase.co">
     <meta name="author" content="Adarsh B A">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
