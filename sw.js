@@ -2,16 +2,16 @@
 const STATIC_ASSETS = [
     './',
     './index.html',
-    './style.css',
-    './script.js',
-    './core-metrics.js',
+    './assets/style.css',
+    './assets/script.js',
+    './assets/core-metrics.js',
     './fdbk.html',
     './resume.html',
     './status.html',
     './404.html',
     './assets/maintenance-bg.jpg',
-    './logo.png',
-    './preview.png',
+    './assets/logo.png',
+    './assets/preview.png',
     'https://unpkg.com/feather-icons'
 ];
 
