@@ -23,7 +23,8 @@ This is not a standard template. This portfolio is engineered from scratch with 
 
 | Feature | Description |
 | :--- | :--- |
-| **📱 WebRTC Ecosystem Sync (P2P)** | A zero-latency peer-to-peer tunnel powered by `PeerJS`. Scan a QR code on your mobile device to instantly turn your phone into a live remote control for the desktop view (remote theme toggling, scrolling, and screen glitching). |
+| **📱 WebRTC Ecosystem Sync (P2P)** | A zero-latency peer-to-peer tunnel powered by `PeerJS`. Scan a QR code on your mobile device to instantly turn your phone into a live remote control for the desktop view. |
+| **🚧 Zero-Latency Maintenance Protocol** | A centralized, Supabase-driven maintenance overlay injected into the `<head>` of all HTML files. It instantly locks down the UI with a custom dark-mode aesthetic without redirects or flashing. |
 | **🛡️ Serverless Contact Pipeline** | Form submissions bypass standard API routes and use a custom, sanitized Google Apps Script proxy. Securely handles dual-email dispatch via the **Resend API**. |
 | **🔒 VIP Intelligence System** | A specialized, high-clearance feedback form that bypasses standard channels, routing critical information directly to administrative oversight with red-alert priority. |
 | **⚡ Service Worker (PWA)** | Utilizes a local `sw.js` Service Worker to heavily cache network requests, fonts, and assets, allowing the portfolio to load instantly and function fully offline. |
