@@ -134,7 +134,7 @@
         fetch('https://mznzvxwzugimqzhhdnae.supabase.co/rest/v1/site_settings?select=is_maintenance_mode', {
           headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16bnp2eHd6dWdpbXF6aGhkbmFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5ODkzNjksImV4cCI6MjEwMTU2NTM2OX0.AL0sY92IZeP_vSyqYRoKoKkE3oMPvNYukNU3uNbJhWs' }
         }).then(r => r.json()).then(d => {
-          const isM = d[0]?.is_maintenance_mode;
+          const isM = (d && d[0]) ? d[0].is_maintenance_mode : false;
           let overlay = document.getElementById('nexus-maintenance-overlay');
           if (isM) {
             // MAINTENANCE ON: keep portfolio hidden, show overlay

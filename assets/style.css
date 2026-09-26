@@ -387,6 +387,7 @@ body {
 .hero-cta {
     display: flex;
     gap: 1.25rem;
+    flex-wrap: wrap;
 }
 
 .btn {
@@ -1119,7 +1120,8 @@ body {
 
 .mail-anchor {
     font-family: var(--font-sans);
-    font-size: 1.6rem;
+    font-size: clamp(1.1rem, 5vw, 1.6rem);
+    word-break: break-all;
     font-weight: 800;
     color: var(--accent-cyan);
     text-decoration: none;
@@ -1651,7 +1653,7 @@ html, body, .glass, .navbar, .skills-card, .project-card, .featured-project-card
     overflow-y: auto;
     transform: scale(0.95) translateY(20px);
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    padding: 3rem;
+    padding: clamp(1.5rem, 4vw, 3rem);
 }
 
 .project-modal.open .modal-content {
@@ -2063,6 +2065,8 @@ html, body, .glass, .navbar, .skills-card, .project-card, .featured-project-card
 
 .profile-item {
     display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     justify-content: space-between;
     align-items: center;
     padding: 1rem;

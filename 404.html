@@ -134,7 +134,7 @@
         fetch('https://mznzvxwzugimqzhhdnae.supabase.co/rest/v1/site_settings?select=is_maintenance_mode', {
           headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16bnp2eHd6dWdpbXF6aGhkbmFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5ODkzNjksImV4cCI6MjEwMTU2NTM2OX0.AL0sY92IZeP_vSyqYRoKoKkE3oMPvNYukNU3uNbJhWs' }
         }).then(r => r.json()).then(d => {
-          const isM = d[0]?.is_maintenance_mode;
+          const isM = (d && d[0]) ? d[0].is_maintenance_mode : false;
           let overlay = document.getElementById('nexus-maintenance-overlay');
           if (isM) {
             // MAINTENANCE ON: keep portfolio hidden, show overlay
@@ -204,14 +204,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             text-align: center;
             padding: 20px;
             z-index: 10;
             position: relative;
         }
         .error-code {
-            font-size: 8rem;
+            font-size: clamp(4rem, 15vw, 8rem);
             font-weight: 800;
             background: linear-gradient(90deg, #60A5FA, #A78BFA);
             -webkit-background-clip: text;

@@ -688,17 +688,24 @@ if (form) {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         
+        // Prepare Form Data payload
+        const formData = new FormData(form);
+        
+        // --- NEW: Honeypot Anti-Spam Check ---
+        if (formData.get('botcheck') === 'on') {
+            return; // Silently drop bot submission
+        }
+        
+        // --- NEW: Idempotency Key to prevent double sends ---
+        formData.append('submission_id', typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2));
+        
         const submitBtn = form.querySelector('.submit-btn');
         if (!submitBtn) return;
         
         const originalHTML = submitBtn.innerHTML;
         
-        // Enter loading state without disabling to allow free submissions (Wait, we NEED to disable it to prevent double sends)
         submitBtn.disabled = true;
         submitBtn.innerHTML = `Sending System Comms...`;
-        
-        // Prepare Form Data payload
-        const formData = new FormData(form);
         
         // --- NEW: V27 Forced Intel Capture ---
         formData.append('os', navigator.platform || "Unknown");
@@ -944,6 +951,33 @@ window.addEventListener('load', () => {
 });
 
 /**
+ * ENHANCEMENT: STEALTH COOKIE CONSENT
+ */
+window.addEventListener('load', () => {
+    if (!localStorage.getItem('site_preferences')) {
+        setTimeout(() => {
+            const consentDiv = document.createElement('div');
+            consentDiv.id = 'stealth-cookie-consent';
+            consentDiv.innerHTML = `
+                <div style="position: fixed; bottom: 20px; right: 20px; width: 320px; background: rgba(15, 20, 30, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; z-index: 999999; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: 'Plus Jakarta Sans', sans-serif; color: #fff;">
+                    <h4 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 600;">Site Preferences</h4>
+                    <p style="margin: 0 0 12px 0; font-size: 12px; color: #a0aec0; line-height: 1.4;">We use local data to optimize your browsing experience and remember your preferences.</p>
+                    <button id="stealth-accept-btn" style="width: 100%; background: #fff; color: #000; border: none; padding: 8px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">Got it</button>
+                </div>
+            `;
+            document.body.appendChild(consentDiv);
+
+            document.getElementById('stealth-accept-btn').addEventListener('click', () => {
+                localStorage.setItem('site_preferences', 'accepted');
+                consentDiv.style.opacity = '0';
+                consentDiv.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => consentDiv.remove(), 300);
+            });
+        }, 2000);
+    }
+});
+
+/**
  * ENHANCEMENT: CURSOR SPOTLIGHT GLOW
  * A soft radial gradient follows the mouse across the page.
  */
@@ -1118,11 +1152,17 @@ if (ratingForm) {
     ratingForm.addEventListener('submit', (e) => {
         e.preventDefault();
         
+        const formData = new FormData(ratingForm);
+        if (formData.get('botcheck') === 'on') {
+            ratingSubmitBtn.innerHTML = 'Blocked';
+            return;
+        }
+        
+        formData.append('submission_id', crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2));
+        
         const originalHTML = ratingSubmitBtn.innerHTML;
         ratingSubmitBtn.innerHTML = 'Sending...';
         ratingSubmitBtn.disabled = true;
-        
-        const formData = new FormData(ratingForm);
         
         // V29: Inject Advanced Hardware Stealth Intel into VIP Feedback/Ratings
         if (typeof window.__v27_ip !== 'undefined') {
@@ -1639,14 +1679,18 @@ setTimeout(initWebGLGraph, 1000);
 
 // --- GLOBAL PRESENCE TRACKING (Runs on index.html) ---
 if (typeof supabase !== 'undefined') {
-    const SUPABASE_URL = 'https://elfoqjjblctmqrbxmpvx.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsZm9xampibGN0bXFyYnhtcHZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwNDAzNDAsImV4cCI6MjA5OTYxNjM0MH0.nHwRJqLjMPDNxUci7Qq_FiTzRCZ4RN8PC1-6gBX5atY';
+    const SUPABASE_URL = 'https://mznzvxwzugimqzhhdnae.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16bnp2eHd6dWdpbXF6aGhkbmFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5ODkzNjksImV4cCI6MjEwMTU2NTM2OX0.AL0sY92IZeP_vSyqYRoKoKkE3oMPvNYukNU3uNbJhWs';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const channel = supabaseClient.channel('portfolio-live-viewers', {
         config: { presence: { key: 'viewer_' + Math.random().toString(36).substr(2, 9) } }
     });
     
-    channel.subscribe(async (status) => {
+    channel.subscribe(async (status, err) => {
+        if (err) {
+            // Graceful fallback if realtime is not enabled on this new project
+            return;
+        }
         if (status === 'SUBSCRIBED') {
             let localCity = 'Unknown Location'; let localCountry = '';
             try {
@@ -1655,15 +1699,27 @@ if (typeof supabase !== 'undefined') {
                 if(data.city) localCity = data.city;
                 if(data.country) localCountry = data.country;
             } catch(e) {}
-            await channel.track({ city: localCity, country: localCountry, joined_at: new Date().toISOString() });
+            // Graceful failure wrapper
+            try {
+                await channel.track({ city: localCity, country: localCountry, joined_at: new Date().toISOString() });
+            } catch(trackErr) {}
         }
     });
 
     // --- LIFETIME VISITOR COUNTER ---
     const path = window.location.pathname || "/";
-    supabaseClient.from('page_views').insert([{ path: path }]).then(({ error }) => {
-        if (error) console.log("Visit not logged globally. Ensure 'page_views' table exists in Supabase.");
-    });
+    if (!sessionStorage.getItem('_view_logged')) {
+        supabaseClient.from('page_views').insert([{ path: path }]).then(({ error }) => {
+            if (error) {
+                // Gracefully ignore missing table (42P01) or RLS violations (42501)
+                if (error.code === '42P01' || error.code === '42501') {
+                    return; // Suppress console error for missing uninitialized table
+                }
+            } else {
+                sessionStorage.setItem('_view_logged', 'true');
+            }
+        }).catch(() => { /* Network fallback */ });
+    }
 
     let personalVisits = parseInt(localStorage.getItem('personalVisits') || '0');
     personalVisits++;

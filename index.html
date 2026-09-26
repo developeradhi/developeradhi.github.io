@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html><html lang="en"><head><meta name="description" content="Adarsh B A | Software Engineer specializing in High-Performance Web Architecture and Database Reliability.">
     <!-- Zero-Latency Maintenance Overlay (No URL Redirects, No Flashing) -->
     <style id="maintenance-anti-flicker">
       body > *:not(#nexus-maintenance-overlay) { opacity: 0 !important; pointer-events: none; }
@@ -132,7 +132,7 @@
         fetch('https://mznzvxwzugimqzhhdnae.supabase.co/rest/v1/site_settings?select=is_maintenance_mode', {
           headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16bnp2eHd6dWdpbXF6aGhkbmFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5ODkzNjksImV4cCI6MjEwMTU2NTM2OX0.AL0sY92IZeP_vSyqYRoKoKkE3oMPvNYukNU3uNbJhWs' }
         }).then(r => r.json()).then(d => {
-          const isM = d[0]?.is_maintenance_mode;
+          const isM = (d && d[0]) ? d[0].is_maintenance_mode : false;
           let overlay = document.getElementById('nexus-maintenance-overlay');
           if (isM) {
             // MAINTENANCE ON: keep portfolio hidden, show overlay
@@ -241,13 +241,14 @@
                 </div>
                 <div class="connect-right fade-in">
                     <form class="connect-form">
+                        <input type="checkbox" name="botcheck" class="hidden" style="display: none;" tabindex="-1" autocomplete="off">
                         <!-- Make.com Webhook Integration -->
                         <input type="hidden" name="form_type" value="contact_message">
                         <div class="form-row">
-                            <input type="text" name="name" placeholder="Your Name" required maxlength="100">
-                            <input type="email" name="email" placeholder="Your Email" required maxlength="150">
+                            <input type="text" name="name" aria-label="Your Name" placeholder="Your Name" required maxlength="100">
+                            <input type="email" name="email" aria-label="Your Email" placeholder="Your Email" required maxlength="150">
                         </div>
-                        <textarea name="message" placeholder="Tell me about your system vision..." rows="5" required maxlength="2000"></textarea>
+                        <textarea name="message" aria-label="Your Message" placeholder="Tell me about your system vision..." rows="5" required maxlength="2000"></textarea>
                         <button type="submit" class="submit-btn">Send Message <i data-feather="arrow-right"></i></button>
                     </form>
                 </div>
